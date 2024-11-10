@@ -32,6 +32,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.firebaseauthdemoapp.pages.*
 
+object AppTheme {
+    val Primary = Color(0xFFDA7756)      // Coral/salmon color
+    val Background = Color(0xFFEDCDBF)    // Soft peachy background
+    val OnPrimary = Color.White          // White text on primary color
+    val TextGray = Color(0xFF666666)     // Gray for unselected items
+}
+
 @Composable
 fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
     val navController = rememberNavController()
@@ -75,6 +82,7 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
         is AuthState.Authenticated -> {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
+                containerColor = AppTheme.Background, // Set background color for the entire screen
                 bottomBar = {
                     Box(
                         modifier = Modifier
@@ -82,8 +90,8 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
                             .fillMaxWidth()
                     ) {
                         NavigationBar(
-                            containerColor = Color(0xFF121212),
-                            contentColor = Color(0xFF03DAC5),
+                            containerColor = Color.White, // White background for nav bar
+                            contentColor = AppTheme.Primary,
                             tonalElevation = 8.dp,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -100,22 +108,28 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
                                         Icon(
                                             imageVector = navItem.icon,
                                             contentDescription = navItem.label,
-                                            tint = if (selectedIndex == index) Color(0xFF03DAC5) else Color.Gray
+                                            tint = if (selectedIndex == index)
+                                                AppTheme.Primary
+                                            else
+                                                AppTheme.TextGray
                                         )
                                     },
                                     label = {
                                         Text(
                                             text = navItem.label,
-                                            color = if (selectedIndex == index) Color(0xFF03DAC5) else Color.Gray
+                                            color = if (selectedIndex == index)
+                                                AppTheme.Primary
+                                            else
+                                                AppTheme.TextGray
                                         )
                                     },
                                     alwaysShowLabel = false,
                                     colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = Color(0xf4c28e),
-                                        unselectedIconColor = Color.Gray,
-                                        selectedTextColor = Color(0xf4ccc2),
-                                        unselectedTextColor = Color.Gray,
-                                        indicatorColor = Color(0xf4ccc2).copy(alpha = 0.1f)
+                                        selectedIconColor = AppTheme.Primary,
+                                        unselectedIconColor = AppTheme.TextGray,
+                                        selectedTextColor = AppTheme.Primary,
+                                        unselectedTextColor = AppTheme.TextGray,
+                                        indicatorColor = AppTheme.Primary.copy(alpha = 0.1f)
                                     )
                                 )
                             }
@@ -137,6 +151,7 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
         }
     }
 }
+
 
 @Composable
 fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, navController: NavController, authViewModel: AuthViewModel) {

@@ -21,6 +21,18 @@ import com.example.firebaseauthdemoapp.AuthViewModel
 import com.example.firebaseauthdemoapp.HomeViewModel
 import com.example.firebaseauthdemoapp.Item
 
+// ... (previous imports remain the same)
+import androidx.compose.ui.graphics.Color
+
+object AppTheme {
+    val Primary = Color(0xFFDA7756)      // Coral/salmon color
+    val Background = Color(0xFFEDCDBF)    // Soft peachy background
+    val OnPrimary = Color.White          // White text on primary color
+    val TextGray = Color(0xFF666666)     // Gray for secondary text
+    val CardBackground = Color.White     // White background for cards
+    val Divider = Color(0xFFE5E5E5)     // Light gray for dividers
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomePage(
@@ -41,14 +53,22 @@ fun HomePage(
     }
 
     Scaffold(
+        containerColor = AppTheme.Background,
         topBar = {
             SmallTopAppBar(
-                title = { Text("Home Page") },
+                title = { Text("LostLink", color = AppTheme.Primary) },
                 actions = {
                     IconButton(onClick = { /* Open notifications */ }) {
-                        Icon(Icons.Filled.Notifications, "Notifications")
+                        Icon(
+                            Icons.Filled.Notifications,
+                            "Notifications",
+                            tint = AppTheme.Primary
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = Color.White,
+                )
             )
         }
     ) { paddingValues ->
@@ -56,38 +76,33 @@ fun HomePage(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
+                .background(AppTheme.Background)
         ) {
-            // Original Home Page Content
-            Text(
-                text = "Home Page",
-                fontSize = 32.sp,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
             TextButton(
                 onClick = { authViewModel.signout() },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.End).padding(horizontal = 16.dp),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = AppTheme.Primary
+                )
             ) {
                 Text(text = "Sign out")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Integrated Search Bar
             SearchBar(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
                 onSearch = { /* Navigate or perform search action */ },
-                modifier = Modifier.padding(16.dp)
-            )
-
-            // Integrated Quick Stats
-            QuickStats(
-                foundCount = homeViewModel.foundItemsCount,
-                returnedCount = homeViewModel.returnedItemsCount,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            // Integrated Recent Items List
+            QuickStats(
+                foundCount = homeViewModel.foundItemsCount,
+                returnedCount = homeViewModel.returnedItemsCount,
+                modifier = Modifier.padding(16.dp)
+            )
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
@@ -97,6 +112,7 @@ fun HomePage(
                     Text(
                         "Recent Lost Items",
                         style = MaterialTheme.typography.titleLarge,
+                        color = AppTheme.Primary,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
@@ -112,7 +128,6 @@ fun HomePage(
     }
 }
 
-// Additional Composables for SearchBar, QuickStats, and ItemCard
 @Composable
 fun SearchBar(
     query: String,
@@ -124,12 +139,18 @@ fun SearchBar(
         value = query,
         onValueChange = onQueryChange,
         modifier = modifier.fillMaxWidth(),
-        placeholder = { Text("Search lost items...") },
+        placeholder = { Text("Search lost items...", color = AppTheme.TextGray) },
         trailingIcon = {
             IconButton(onClick = onSearch) {
-                Icon(Icons.Filled.Search, "Search")
+                Icon(Icons.Filled.Search, "Search", tint = AppTheme.Primary)
             }
-        }
+        },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = AppTheme.Primary,
+            unfocusedBorderColor = AppTheme.TextGray,
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White
+        )
     )
 }
 
@@ -165,6 +186,9 @@ fun StatCard(
 ) {
     Card(
         modifier = modifier.padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
     ) {
         Column(
             modifier = Modifier
@@ -174,11 +198,13 @@ fun StatCard(
         ) {
             Text(
                 text = count.toString(),
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium,
+                color = AppTheme.Primary
             )
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppTheme.TextGray
             )
         }
     }
@@ -194,6 +220,9 @@ fun ItemCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
     ) {
         Row(
             modifier = Modifier
@@ -205,22 +234,24 @@ fun ItemCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.name,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = AppTheme.Primary
                 )
                 Text(
                     text = item.category.name,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = AppTheme.TextGray
                 )
                 Text(
                     text = "Lost on ${item.dateLost}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppTheme.TextGray
                 )
             }
             if (item.matchPercentage != null) {
                 Text(
                     text = "${(item.matchPercentage * 100).toInt()}% Match",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = AppTheme.Primary,
                     style = MaterialTheme.typography.labelMedium
                 )
             }
