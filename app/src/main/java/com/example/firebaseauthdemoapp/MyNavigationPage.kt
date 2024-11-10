@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -36,8 +39,9 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
 
     val navItemList = listOf(
         NavItem("Home", Icons.Default.Home),
-        NavItem("Settings", Icons.Default.Settings),
-        NavItem("Notifications", Icons.Default.Notifications),
+        NavItem("Report", Icons.Default.Send),
+        NavItem("Search", Icons.Default.Search),
+        NavItem("Profile", Icons.Default.Person),
     )
 
     var selectedIndex by remember {
@@ -107,11 +111,11 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
                                     },
                                     alwaysShowLabel = false,
                                     colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = Color(0xFF03DAC5),
+                                        selectedIconColor = Color(0xf4c28e),
                                         unselectedIconColor = Color.Gray,
-                                        selectedTextColor = Color(0xFF03DAC5),
+                                        selectedTextColor = Color(0xf4ccc2),
                                         unselectedTextColor = Color.Gray,
-                                        indicatorColor = Color(0xFF03DAC5).copy(alpha = 0.1f)
+                                        indicatorColor = Color(0xf4ccc2).copy(alpha = 0.1f)
                                     )
                                 )
                             }
@@ -138,8 +142,9 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
 fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, navController: NavController, authViewModel: AuthViewModel) {
     when(selectedIndex) {
         0 -> NewHomePage(navController = navController, authViewModel = authViewModel)
-        1 -> ProfilePage()
-        2 -> NotificationsPage()
+        1 -> ReportPage()
+        2 -> SearchPage()
+        3 -> ProfilePage()
     }
 }
 
