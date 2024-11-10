@@ -2,6 +2,7 @@ package com.example.firebaseauthdemoapp.pages
 
 import android.widget.Space
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,83 +27,98 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import com.example.firebaseauthdemoapp.AuthState
 import com.example.firebaseauthdemoapp.AuthViewModel
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.Color
+
+// Define colors
+val PrimaryColor = Color(0xFFDA7756)
+val BackgroundColor = Color(0xFFEDCDBF)
+
+// Set up a color scheme using the custom colors
+private val ColorScheme = lightColorScheme(
+    primary = PrimaryColor,
+    onPrimary = Color.White,
+    background = BackgroundColor,
+    onBackground = Color.Black
+)
 
 @Composable
-fun LoginPage(modifier: Modifier, navController: NavController, authViewModel: AuthViewModel){
-    var email by remember {
-        mutableStateOf("")
-    }
-
-    var password by remember {
-        mutableStateOf("")
-    }
-
-    val authState = authViewModel.authState.observeAsState()
-    val context = LocalContext.current
-
-    LaunchedEffect(authState.value) {
-        when (authState.value) {
-            is AuthState.Authenticated -> navController.navigate("homepage")
-            is AuthState.Error -> Toast.makeText(
-                context,
-                (authState.value as AuthState.Error).message,
-                Toast.LENGTH_SHORT
-            ).show()
-            else -> Unit
-        }
-    }
+fun AppTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = ColorScheme,
+        typography = MaterialTheme.typography,
+        content = content
+    )
+}
 
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-       Text(
-           text = "Login Page",
-           fontSize = 32.sp
-       )
-        Spacer(modifier = Modifier.height(16.dp))
+@Composable
+fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel) {
+    AppTheme {
+        var email by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        val authState = authViewModel.authState.observeAsState()
+        val context = LocalContext.current
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = {
-                email = it
-            },
-            label = {
-                Text(text = "Email")
+        LaunchedEffect(authState.value) {
+            when (authState.value) {
+                is AuthState.Authenticated -> navController.navigate("homepage")
+                is AuthState.Error -> Toast.makeText(
+                    context,
+                    (authState.value as AuthState.Error).message,
+                    Toast.LENGTH_SHORT
+                ).show()
+                else -> Unit
             }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = {
-                password = it
-            },
-            label = {
-                Text(text = "Password")
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = {
-            authViewModel.login(email, password)
-        },
-            enabled = authState.value != AuthState.Loading
-            ){
-            Text(text = "Login")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Login Page",
+                fontSize = 32.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(
-            onClick = {
-                navController.navigate("signup")
-            }) {
-            Text(text = "Don't have an account, Signup")
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text(text = "Email") }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text(text = "Password") }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { authViewModel.login(email, password) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
+                ),
+                enabled = authState.value != AuthState.Loading
+            ) {
+                Text(text = "Login")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(onClick = { navController.navigate("signup") }) {
+                Text(text = "Don't have an account, Signup")
+            }
         }
     }
 }
