@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -32,13 +34,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.firebaseauthdemoapp.pages.*
 
-object AppTheme {
-    val Primary = Color(0xFFDA7756)      // Coral/salmon color
-    val Background = Color(0xFFEDCDBF)    // Soft peachy background
-    val OnPrimary = Color.White          // White text on primary color
-    val TextGray = Color(0xFF666666)     // Gray for unselected items
-}
-
 @Composable
 fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
     val navController = rememberNavController()
@@ -48,7 +43,8 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
         NavItem("Home", Icons.Default.Home),
         NavItem("Report", Icons.Default.Send),
         NavItem("Search", Icons.Default.Search),
-        NavItem("Profile", Icons.Default.Person),
+        NavItem("Profile", Icons.Default.AccountCircle),
+        NavItem("AI", Icons.Default.Call)
     )
 
     var selectedIndex by remember {
@@ -159,7 +155,8 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, navControll
         0 -> NewHomePage(navController = navController, authViewModel = authViewModel)
         1 -> ReportPage()
         2 -> SearchPage()
-        3 -> ProfilePage()
+        3 -> ProfilePage(navController = navController, authViewModel = authViewModel)
+        4 -> ChatBot()
     }
 }
 

@@ -3,7 +3,6 @@ package com.example.firebaseauthdemoapp.pages
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,10 +17,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -34,9 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.firebaseauthdemoapp.AuthState
 import com.example.firebaseauthdemoapp.AuthViewModel
 
@@ -53,20 +47,22 @@ fun NewHomePage(
     LaunchedEffect(authState) {
         if (authState is AuthState.Unauthenticated && isSigningOut) {
             navController.navigate("login") {
-                // Clear the back stack so user can't navigate back
                 popUpTo("home") { inclusive = true }
             }
-            isSigningOut = false // Reset after navigation
+            isSigningOut = false
         }
     }
 
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFEDCDBF)), // Set background here
         topBar = {
             SmallTopAppBar(
-                title = { Text("Home Page", fontWeight = FontWeight.Bold, fontSize = 20.sp) },
+                title = { Text("LostLink", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color(0xFFDA7756)) },
                 actions = {
                     IconButton(onClick = { /* Open notifications */ }) {
-                        Icon(Icons.Filled.Notifications, "Notifications")
+                        Icon(Icons.Filled.Notifications, "Notifications", tint = Color(0xFFDA7756))
                     }
                 }
             )
@@ -74,9 +70,9 @@ fun NewHomePage(
     ) { paddingValues ->
         Surface(
             modifier = Modifier
-                .padding(paddingValues)
                 .fillMaxSize()
-                .background(Color(0xFFF5F5F5))
+                .padding(paddingValues)
+                .background(Color(0xFFEDCDBF)) // Also set background here
         ) {
             Column(
                 modifier = Modifier
@@ -89,7 +85,7 @@ fun NewHomePage(
                     text = "Welcome to the Home Page",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
+                    color = Color(0xFFDA7756)
                 )
                 Text(
                     text = "Explore the app and enjoy the features.",
@@ -99,12 +95,12 @@ fun NewHomePage(
                 )
                 Button(
                     onClick = {
-                        if (!isSigningOut) { // Debounce to prevent multiple clicks
+                        if (!isSigningOut) {
                             isSigningOut = true
                             authViewModel.signout()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDA7756)),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.padding(vertical = 8.dp)
                 ) {
@@ -112,24 +108,5 @@ fun NewHomePage(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun AppNavigation(authViewModel: AuthViewModel) {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "home") {
-        composable("home") { NewHomePage(navController = navController, authViewModel = authViewModel) }
-        composable("login") { LoginPage(
-            navController = navController,
-            authViewModel = authViewModel,
-            modifier = Modifier.fillMaxSize()
-        ) }
-        composable("signup") { SignupPage(
-            navController = navController,
-            authViewModel = authViewModel,
-            modifier = Modifier.fillMaxSize()
-        ) }
-        // Add other destinations here
     }
 }
