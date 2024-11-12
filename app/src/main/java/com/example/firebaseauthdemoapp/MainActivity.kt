@@ -28,8 +28,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.firebaseauthdemoapp.pages.HomePage
 import com.example.firebaseauthdemoapp.pages.NewHomePage
 import com.example.firebaseauthdemoapp.pages.NotificationsPage
-import com.example.firebaseauthdemoapp.pages.ProfilePage
 import com.example.firebaseauthdemoapp.pages.SettingsPage
+import com.example.firebaseauthdemoapp.pages.ProfilePage
 import com.example.firebaseauthdemoapp.ui.theme.FirebaseAuthDemoAppTheme
 
 class MainActivity : ComponentActivity() {

@@ -2,11 +2,14 @@ package com.example.firebaseauthdemoapp.pages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -40,7 +43,7 @@ fun ProfilePage(
     modifier: Modifier = Modifier,
     navController: NavController,
     authViewModel: AuthViewModel
-){
+) {
     val authState by authViewModel.authState.observeAsState()
     var isSigningOut by remember { mutableStateOf(false) }
 
@@ -56,13 +59,15 @@ fun ProfilePage(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFEDCDBF)), // Set background here
+            .background(AppTheme.Background), // Use the theme's background color
         topBar = {
             SmallTopAppBar(
-                title = { Text("LostLink", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color(0xFFDA7756)) },
+                title = {
+                    Text("Profile", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = AppTheme.Primary)
+                },
                 actions = {
                     IconButton(onClick = { /* Open notifications */ }) {
-                        Icon(Icons.Filled.Notifications, "Notifications", tint = Color(0xFFDA7756))
+                        Icon(Icons.Filled.Notifications, "Notifications", tint = AppTheme.Primary)
                     }
                 }
             )
@@ -72,27 +77,49 @@ fun ProfilePage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFEDCDBF)) // Also set background here
+                .background(AppTheme.Background) // Also set background here
         ) {
             Column(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Add profile image (use a placeholder image for now)
+                // You can replace this with an Image if you have a profile picture
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .background(AppTheme.Primary, RoundedCornerShape(60.dp))
+                ) {
+                    // Image or Icon for profile picture
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier.fillMaxSize(),
+                        tint = Color.White
+                    )
+                }
+
+                // Profile Name
                 Text(
-                    text = "Welcome to the Home Page",
-                    fontSize = 28.sp,
+                    text = "John Doe", // Use actual user data here
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFDA7756)
+                    color = AppTheme.Primary,
+                    modifier = Modifier.padding(top = 16.dp)
                 )
+
+                // Email or additional information
                 Text(
-                    text = "Explore the app and enjoy the features.",
+                    text = "john.doe@example.com", // Replace with actual email
                     fontSize = 16.sp,
-                    color = Color(0xFF666666),
-                    modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
+                    color = AppTheme.TextGray,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
+
+                // Sign Out Button
                 Button(
                     onClick = {
                         if (!isSigningOut) {
@@ -100,9 +127,9 @@ fun ProfilePage(
                             authViewModel.signout()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDA7756)),
+                    colors = ButtonDefaults.buttonColors(containerColor = AppTheme.Primary),
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier.padding(vertical = 16.dp)
                 ) {
                     Text(text = "Sign Out", color = Color.White, fontSize = 16.sp)
                 }

@@ -1,38 +1,28 @@
 package com.example.firebaseauthdemoapp
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.firebaseauthdemoapp.pages.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 @Composable
 fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
@@ -53,7 +43,7 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
 
     when (authState) {
         is AuthState.Loading -> {
-            LoadingScreen()
+            LoadingScreen() // This will use the updated loading screen
         }
 
         is AuthState.Error -> {
@@ -143,35 +133,70 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
         }
 
         null -> {
-            LoadingScreen()
+            LoadingScreen() // This will use the updated loading screen
         }
     }
 }
 
-
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, navController: NavController, authViewModel: AuthViewModel) {
-    when(selectedIndex) {
+fun ContentScreen(
+    modifier: Modifier = Modifier,
+    selectedIndex: Int,
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(LocalContext.current)
+) {
+    when (selectedIndex) {
         0 -> NewHomePage(navController = navController, authViewModel = authViewModel)
-        1 -> ReportPage(viewModel = AppViewModel())
+        1 -> ReportPage(viewModel = AppViewModel(), fusedLocationClient = fusedLocationClient)
         2 -> SearchPage()
         3 -> ProfilePage(navController = navController, authViewModel = authViewModel)
         4 -> ChatBot()
     }
 }
 
+
 @Composable
 fun LoadingScreen() {
-    // Implement your loading screen UI
+    // Use AppTheme.Primary for the color of the CircularProgressIndicator
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(
             modifier = Modifier.size(48.dp),
-            color = MaterialTheme.colorScheme.primary
+            color = AppTheme.Primary // Updated to use the custom theme color
         )
     }
 }
 
 @Composable
 fun ErrorScreen(message: String) {
-    // Implement your error screen UI
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppTheme.Primary, // Set text color to your primary color
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Button(
+                onClick = { /* Handle retry action */ },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AppTheme.Primary,
+                    contentColor = Color.White
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Retry")
+            }
+        }
+    }
 }
+
