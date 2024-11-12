@@ -7,8 +7,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -22,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.firebaseauthdemoapp.VoiceToTextParser
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ChatBot(modifier: Modifier = Modifier) {
@@ -44,14 +49,21 @@ fun ChatBot(modifier: Modifier = Modifier) {
     val state by voiceToTextParser.state.collectAsState()
 
     Scaffold(
+        containerColor = Color(0xFFEDCDBF), // Soft peachy background
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                if (state.isSpeaking) {
-                    voiceToTextParser.stopListening()
-                } else {
-                    voiceToTextParser.startListening()
-                }
-            }) {
+            FloatingActionButton(
+                onClick = {
+                    if (state.isSpeaking) {
+                        voiceToTextParser.stopListening()
+                    } else {
+                        voiceToTextParser.startListening()
+                    }
+                },
+                containerColor = Color(0xFFDA7756), // Coral/salmon button color
+                modifier = Modifier
+                    .padding(16.dp)
+                    .offset(y = (-24).dp) // Adjust as needed for visibility
+            ) {
                 AnimatedContent(targetState = state.isSpeaking) { isSpeaking ->
                     if (isSpeaking) {
                         Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
@@ -72,11 +84,16 @@ fun ChatBot(modifier: Modifier = Modifier) {
         ) {
             AnimatedContent(targetState = state.isSpeaking) { isSpeaking ->
                 if (isSpeaking) {
-                    Text(text = "Listening...")
+//                    Text(text = "Listening...")
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Text(text = state.error ?: "")
                 } else {
-                    Text(text = state.spokenText.ifEmpty { "Click on mic to start speaking" })
+//                    Text(text = state.spokenText.ifEmpty { "Click on mic to start speaking" })
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Text(text = state.error ?: "")
                 }
             }
         }
     }
 }
+

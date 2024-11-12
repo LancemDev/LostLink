@@ -17,27 +17,23 @@ class VoiceToTextParser(
     private val _state = MutableStateFlow(VoiceToTextParserState())
     val state = _state.asStateFlow()
 
-    private val recognizer: SpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(app).apply {
+    private val recognizer: SpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(app.applicationContext).apply {
         setRecognitionListener(this@VoiceToTextParser)
     }
 
-    fun startListening(languageCode: String = "en-US") {
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(
-                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-            )
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageCode)
-        }
-        recognizer.startListening(intent)
 
-        _state.update {
-            it.copy(
-                isSpeaking = true,
-                error = null
-            )
+    fun startListening(languageCode: String = "en-US") {
+        if (SpeechRecognizer.isRecognitionAvailable(app)) {
+            recognizer.startListening(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageCode)
+            })
+            _state.update { it.copy(isSpeaking = true, error = null) }
+        } else {
+            _state.update { it.copy(error = "Speech recognition not available on this device.") }
         }
     }
+
 
     fun stopListening() {
         recognizer.stopListening()

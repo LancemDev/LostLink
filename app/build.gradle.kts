@@ -55,7 +55,6 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.play.services.maps)
     implementation(libs.firebase.firestore.ktx)
-    implementation(libs.androidx.ui.desktop)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

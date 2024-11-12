@@ -153,7 +153,7 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
 fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int, navController: NavController, authViewModel: AuthViewModel) {
     when(selectedIndex) {
         0 -> NewHomePage(navController = navController, authViewModel = authViewModel)
-        1 -> ReportPage()
+        1 -> ReportPage(viewModel = AppViewModel())
         2 -> SearchPage()
         3 -> ProfilePage(navController = navController, authViewModel = authViewModel)
         4 -> ChatBot()
