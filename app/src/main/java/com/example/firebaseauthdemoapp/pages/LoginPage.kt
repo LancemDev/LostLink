@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import com.example.firebaseauthdemoapp.AuthState
 import com.example.firebaseauthdemoapp.AuthViewModel
+import com.example.firebaseauthdemoapp.R
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
@@ -88,7 +89,7 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
         ) {
             // Add the drawable image at the top of the login form
             Image(
-                painter = painterResource(id = R.drawable.login),  // Correct usage of painterResource
+                painter = painterResource(id = R.drawable.lostlink),  // Correct usage of painterResource
                 contentDescription = "Login Image",
                 modifier = Modifier
                     .size(120.dp) // Adjust size as needed
