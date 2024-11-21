@@ -61,15 +61,18 @@ fun SignupPage(modifier: Modifier = Modifier, navController: NavController, auth
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text(text = "Email", color = AppTheme.Primary) }, // Using primary color for label
+            label = { Text(text = "Email") }, // No need to set color here
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp), // Added padding to avoid full width
+                .padding(horizontal = 24.dp),
             colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = AppTheme.Primary,
-                unfocusedBorderColor = AppTheme.TextGray
+                unfocusedBorderColor = AppTheme.Primary,
+                focusedLabelColor = AppTheme.Primary, // Set focused label color
+                unfocusedLabelColor = AppTheme.TextGray // Set unfocused label color
             )
         )
+
 
         Spacer(modifier = Modifier.height(8.dp))
 

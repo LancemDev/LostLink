@@ -56,10 +56,10 @@ fun NewHomePage(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFEDCDBF)), // Set background here
+            .background(AppTheme.OnPrimary), // Set background here
         topBar = {
             SmallTopAppBar(
-                title = { Text("LostLink", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color(0xFFDA7756)) },
+                title = { Text("LostLink", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = AppTheme.Primary) },
                 actions = {
                     IconButton(onClick = { /* Open notifications */ }) {
                         Icon(Icons.Filled.Notifications, "Notifications", tint = Color(0xFFDA7756))
@@ -72,7 +72,7 @@ fun NewHomePage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFEDCDBF)) // Also set background here
+                .background(AppTheme.Primary) // Also set background here
         ) {
             Column(
                 modifier = Modifier

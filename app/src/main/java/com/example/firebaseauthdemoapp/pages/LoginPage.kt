@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.*
@@ -30,6 +32,10 @@ import com.example.firebaseauthdemoapp.AuthViewModel
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+
 
 // Define colors
 val PrimaryColor = Color(0xFFDA7756)
@@ -80,6 +86,15 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Add the drawable image at the top of the login form
+            Image(
+                painter = painterResource(id = R.drawable.login),  // Correct usage of painterResource
+                contentDescription = "Login Image",
+                modifier = Modifier
+                    .size(120.dp) // Adjust size as needed
+                    .padding(bottom = 32.dp) // Add padding if required
+            )
+
             Text(
                 text = "Login Page",
                 fontSize = 32.sp,

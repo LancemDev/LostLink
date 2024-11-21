@@ -36,11 +36,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import java.util.*
 
-//val Coral = Color(0xFFDA7756)
-//val Peachy = Color(0xFFEDCDBF)
-//
-//val Coral = Color(0xFFDA7756)
-//val Peachy = Color(0xFFEDCDBF)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,7 +82,7 @@ fun ReportPage(
         containerColor = AppTheme.Background,
         topBar = {
             SmallTopAppBar(
-                title = { Text("Report Lost Item", color = AppTheme.OnPrimary) }
+                title = { Text("Find your Lost Item", color = AppTheme.OnPrimary) }
             )
         }
     ) { padding ->
