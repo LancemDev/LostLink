@@ -2,10 +2,8 @@ package com.example.firebaseauthdemoapp
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -24,7 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.firebaseauthdemoapp.pages.*
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
@@ -38,19 +36,20 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
         NavItem("AI", Icons.Default.Call)
     )
 
-    var selectedIndex by remember {
-        mutableIntStateOf(0)
-    }
+    val adminNavItemList = listOf(
+        NavItem("Admin Dashboard", Icons.Default.Home),
+        NavItem("Admin Settings", Icons.Default.Settings)
+    )
+
+    var selectedIndex by remember { mutableIntStateOf(0) }
 
     when (authState) {
         is AuthState.Loading -> {
-            LoadingScreen() // This will use the updated loading screen
+            LoadingScreen()
         }
-
         is AuthState.Error -> {
             ErrorScreen((authState as AuthState.Error).message)
         }
-
         is AuthState.Unauthenticated -> {
             NavHost(
                 navController = navController,
@@ -65,11 +64,11 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
                 }
             )
         }
-
         is AuthState.Authenticated -> {
+            val isAdmin = checkIfUserIsAdmin() // Implement this function to check if the user is an admin
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
-                containerColor = AppTheme.Background, // Set background color for the entire screen
+                containerColor = AppTheme.Background,
                 bottomBar = {
                     Box(
                         modifier = Modifier
@@ -77,7 +76,7 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
                             .fillMaxWidth()
                     ) {
                         NavigationBar(
-                            containerColor = Color.White, // White background for nav bar
+                            containerColor = Color.White,
                             contentColor = AppTheme.Primary,
                             tonalElevation = 8.dp,
                             modifier = Modifier
@@ -85,7 +84,8 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
                                 .height(56.dp)
                                 .shadow(8.dp, shape = MaterialTheme.shapes.medium)
                         ) {
-                            navItemList.forEachIndexed { index, navItem ->
+                            val items = if (isAdmin) adminNavItemList else navItemList
+                            items.forEachIndexed { index, navItem ->
                                 NavigationBarItem(
                                     selected = selectedIndex == index,
                                     onClick = {
@@ -128,40 +128,53 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
                     modifier = Modifier.padding(innerPadding),
                     selectedIndex = selectedIndex,
                     navController = navController,
-                    authViewModel = authViewModel
+                    authViewModel = authViewModel,
+                    isAdmin = isAdmin
                 )
             }
         }
-
         null -> {
-            LoadingScreen() // This will use the updated loading screen
+            LoadingScreen()
         }
     }
 }
+
 @Composable
 fun ContentScreen(
     modifier: Modifier = Modifier,
     selectedIndex: Int,
     navController: NavController,
     authViewModel: AuthViewModel,
+    isAdmin: Boolean,
     fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(LocalContext.current)
 ) {
-    when (selectedIndex) {
-        0 -> NewHomePage(navController = navController, authViewModel = authViewModel)
-        1 -> ReportPage(viewModel = AppViewModel(), fusedLocationClient = fusedLocationClient)
-        2 -> ProfilePage(navController = navController, authViewModel = authViewModel)
-        3 -> ChatBot()
+    if (isAdmin) {
+        when (selectedIndex) {
+            0 -> AdminDashboardPage()
+            1 -> AdminSettingsPage()
+        }
+    } else {
+        when (selectedIndex) {
+            0 -> NewHomePage(navController = navController, authViewModel = authViewModel)
+            1 -> ReportPage(viewModel = AppViewModel(), fusedLocationClient = fusedLocationClient)
+            2 -> ProfilePage(navController = navController, authViewModel = authViewModel)
+            3 -> ChatBot()
+        }
     }
 }
 
+fun checkIfUserIsAdmin(): Boolean {
+    // Implement your logic to check if the user is an admin
+    // For example, check a specific field in the user's profile
+    return FirebaseAuth.getInstance().currentUser?.email == "admin@example.com"
+}
 
 @Composable
 fun LoadingScreen() {
-    // Use AppTheme.Primary for the color of the CircularProgressIndicator
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(
             modifier = Modifier.size(48.dp),
-            color = AppTheme.Primary // Updated to use the custom theme color
+            color = AppTheme.Primary
         )
     }
 }
@@ -182,7 +195,7 @@ fun ErrorScreen(message: String) {
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
-                color = AppTheme.Primary, // Set text color to your primary color
+                color = AppTheme.Primary,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Button(
