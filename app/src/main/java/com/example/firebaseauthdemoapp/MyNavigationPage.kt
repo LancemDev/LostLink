@@ -151,7 +151,7 @@ fun ContentScreen(
     if (isAdmin) {
         when (selectedIndex) {
             0 -> AdminDashboardPage()
-            1 -> AdminSettingsPage()
+            1 -> AdminSettingsPage(modifier = Modifier, navController = navController, authViewModel = authViewModel)
         }
     } else {
         when (selectedIndex) {
