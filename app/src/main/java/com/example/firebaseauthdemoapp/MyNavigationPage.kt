@@ -2,10 +2,13 @@ package com.example.firebaseauthdemoapp
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -38,6 +41,8 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
 
     val adminNavItemList = listOf(
         NavItem("Admin Dashboard", Icons.Default.Home),
+        NavItem("Upload", Icons.Default.AddCircle),
+        NavItem("Item Progress Tracker",Icons.Default.List),
         NavItem("Admin Settings", Icons.Default.Settings)
     )
 
@@ -151,7 +156,9 @@ fun ContentScreen(
     if (isAdmin) {
         when (selectedIndex) {
             0 -> AdminDashboardPage()
-            1 -> AdminSettingsPage(modifier = Modifier, navController = navController, authViewModel = authViewModel)
+            1 -> UploadFoundItem()
+            2 -> ItemOverviewPage()
+            3 -> AdminSettingsPage(modifier = Modifier, navController = navController, authViewModel = authViewModel)
         }
     } else {
         when (selectedIndex) {
