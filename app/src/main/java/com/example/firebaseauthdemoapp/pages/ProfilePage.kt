@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.firebaseauthdemoapp.AuthState
 import com.example.firebaseauthdemoapp.AuthViewModel
+import com.example.firebaseauthdemoapp.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,13 +65,14 @@ fun ProfilePage(
         topBar = {
             SmallTopAppBar(
                 title = {
-                    Text("Profile", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = AppTheme.Primary)
+                    Text("Profile", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = AppTheme.OnPrimary)
                 },
                 actions = {
                     IconButton(onClick = { /* Open notifications */ }) {
-                        Icon(Icons.Filled.Notifications, "Notifications", tint = AppTheme.Primary)
+                        Icon(Icons.Filled.Notifications, "Notifications", tint = AppTheme.OnPrimary)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = AppTheme.Primary)
             )
         }
     ) { paddingValues ->
@@ -107,7 +110,7 @@ fun ProfilePage(
                     text = "John Doe", // Use actual user data here
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AppTheme.Primary,
+                    color = AppTheme.OnSurface,
                     modifier = Modifier.padding(top = 16.dp)
                 )
 
