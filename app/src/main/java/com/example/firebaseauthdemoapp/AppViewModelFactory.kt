@@ -12,7 +12,7 @@ class AppViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AppViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AppViewModel(firestore, storage) as T
+            return AppViewModel() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

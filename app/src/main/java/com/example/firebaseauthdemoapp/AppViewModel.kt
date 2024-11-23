@@ -1,26 +1,27 @@
 package com.example.firebaseauthdemoapp
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import android.net.Uri
 import java.util.UUID
 
 
+class AppViewModel : ViewModel() {
 
-class AppViewModel(
-    private val firestore: FirebaseFirestore,
-    private val storage: FirebaseStorage
-) : ViewModel() {
+    private val firestore = Firebase.firestore
+    private val storage = Firebase.storage
     private val _uploadStatus = MutableStateFlow<UploadStatus>(UploadStatus.Idle)
-    val uploadStatus = _uploadStatus.asStateFlow()
+    val uploadStatus: StateFlow<UploadStatus> = _uploadStatus
 
     private val _reportHistory = MutableStateFlow<List<ReportItemState>>(emptyList())
     val reportHistory = _reportHistory.asStateFlow()
@@ -164,6 +165,71 @@ class AppViewModel(
         }
     }
 
+    fun uploadFoundItem(
+        reportState: UploadItemState,
+        locationDescription: String,
+        selectedDate: String,
+        selectedTime: String,
+        imageUri: Uri?
+    ) = viewModelScope.launch {
+        try {
+            _uploadStatus.value = UploadStatus.Loading
+
+            val currentUser = Firebase.auth.currentUser
+            val imageUrls = mutableListOf<String>()
+
+            imageUri?.let { uri ->
+                val storageRef = storage.reference.child("found_items/${UUID.randomUUID()}")
+                val uploadTask = storageRef.putFile(uri)
+                uploadTask.addOnSuccessListener {
+                    storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                        imageUrls.add(downloadUri.toString())
+                        saveFoundItem(reportState, locationDescription, selectedDate, selectedTime, imageUrls, currentUser?.uid)
+                    }.addOnFailureListener {
+                        _uploadStatus.value = UploadStatus.Error
+                    }
+                }.addOnFailureListener {
+                    _uploadStatus.value = UploadStatus.Error
+                }
+            } ?: saveFoundItem(reportState, locationDescription, selectedDate, selectedTime, imageUrls, currentUser?.uid)
+
+        } catch (e: Exception) {
+            _uploadStatus.value = UploadStatus.Error
+        }
+    }
+
+    private fun saveFoundItem(
+        reportState: UploadItemState,
+        locationDescription: String,
+        selectedDate: String,
+        selectedTime: String,
+        imageUrls: List<String>,
+        userId: String?
+    ) {
+        val foundItem = hashMapOf(
+            "name" to reportState.itemName,
+            "category" to reportState.category.name,
+            "description" to reportState.description,
+            "location" to locationDescription,
+            "dateFound" to Timestamp.now(), // Combine selectedDate and selectedTime into a Timestamp
+            "imageUrls" to imageUrls,
+            "status" to "available",
+            "addedBy" to (userId ?: ""),
+            "claimedBy" to null,
+            "characteristics" to emptyMap<String, String>(),
+            "createdAt" to Timestamp.now()
+        )
+
+        firestore.collection("foundItems")
+            .add(foundItem)
+            .addOnSuccessListener {
+                _uploadStatus.value = UploadStatus.Success
+            }
+            .addOnFailureListener {
+                _uploadStatus.value = UploadStatus.Error
+            }
+    }
+
     fun resetUploadStatus() {
         _uploadStatus.value = UploadStatus.Idle
     }
@@ -172,4 +238,5 @@ class AppViewModel(
         // Implement your logic to find potential matches
     }
 }
+
 
