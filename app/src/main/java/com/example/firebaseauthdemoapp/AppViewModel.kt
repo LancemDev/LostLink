@@ -18,6 +18,9 @@ class AppViewModel(
     private val _uploadStatus = MutableStateFlow<UploadStatus>(UploadStatus.Idle)
     val uploadStatus = _uploadStatus.asStateFlow()
 
+    private val _reportHistory = MutableStateFlow<List<ReportItemState>>(emptyList())
+    val reportHistory = _reportHistory.asStateFlow()
+
     fun submitReport(
         reportState: ReportItemState,
         locationDescription: String,
@@ -54,6 +57,32 @@ class AppViewModel(
 
         } catch (e: Exception) {
             _uploadStatus.value = UploadStatus.Error
+        }
+    }
+
+    fun fetchReportHistory() = viewModelScope.launch {
+        try {
+            val currentUser = Firebase.auth.currentUser
+            if (currentUser != null) {
+                firestore.collection("lostItemReports")
+                    .whereEqualTo("userId", currentUser.uid)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        val reports = documents.map { document ->
+                            ReportItemState(
+                                itemName = document.getString("itemName") ?: "",
+                                category = ItemCategory.valueOf(document.getString("category") ?: "OTHER"),
+                                description = document.getString("description") ?: ""
+                            )
+                        }
+                        _reportHistory.value = reports
+                    }
+                    .addOnFailureListener {
+                        _reportHistory.value = emptyList()
+                    }
+            }
+        } catch (e: Exception) {
+            _reportHistory.value = emptyList()
         }
     }
 
