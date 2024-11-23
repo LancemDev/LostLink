@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.*
+import android.net.Uri
+import java.util.UUID
+
 
 class AppViewModel : ViewModel() {
 
@@ -23,6 +25,80 @@ class AppViewModel : ViewModel() {
 
     private val _reportHistory = MutableStateFlow<List<ReportItemState>>(emptyList())
     val reportHistory = _reportHistory.asStateFlow()
+
+    fun submitFoundItem(
+        uploadState: UploadItemState,
+        locationDescription: String,
+        selectedDate: String,
+        selectedTime: String,
+        imageUri: Uri?,
+        onResult: (Boolean, String) -> Unit
+    ) = viewModelScope.launch {
+        try {
+            _uploadStatus.value = UploadStatus.Loading
+
+            val currentUser = Firebase.auth.currentUser
+
+            val foundItem = hashMapOf<String, Any>(
+                "userId" to (currentUser?.uid ?: ""),
+                "category" to uploadState.category.name,
+                "itemName" to uploadState.itemName,
+                "description" to uploadState.description,
+                "locationDescription" to locationDescription,
+                "dateFound" to Timestamp.now(), // Combine selectedDate and selectedTime into a Timestamp
+                "status" to "pending",
+                "createdAt" to Timestamp.now()
+            )
+
+            if (imageUri != null) {
+                // Upload the image to Firebase Storage
+
+                val fileName = UUID.randomUUID().toString()
+                val storageRef = storage.reference.child("found_items/$fileName")
+
+                storageRef.putFile(imageUri)
+                    .addOnSuccessListener { taskSnapshot ->
+                        storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                            foundItem["imageUrl"] = downloadUri.toString()
+
+                            // Add the found item to Firestore
+                            firestore.collection("foundItems")
+                                .add(foundItem)
+                                .addOnSuccessListener {
+                                    _uploadStatus.value = UploadStatus.Success
+                                    onResult(true, "Found item submitted successfully!")
+                                }
+                                .addOnFailureListener { e ->
+                                    _uploadStatus.value = UploadStatus.Error
+                                    onResult(false, "Failed to submit found item: ${e.message}")
+                                }
+                        }.addOnFailureListener { e ->
+                            _uploadStatus.value = UploadStatus.Error
+                            onResult(false, "Failed to retrieve image URL: ${e.message}")
+                        }
+                    }.addOnFailureListener { e ->
+                        _uploadStatus.value = UploadStatus.Error
+                        onResult(false, "Failed to upload image: ${e.message}")
+                    }
+            } else {
+                // If no image, directly add the found item to Firestore
+                firestore.collection("foundItems")
+                    .add(foundItem)
+                    .addOnSuccessListener {
+                        _uploadStatus.value = UploadStatus.Success
+                        onResult(true, "Found item submitted successfully!")
+                    }
+                    .addOnFailureListener { e ->
+                        _uploadStatus.value = UploadStatus.Error
+                        onResult(false, "Failed to submit found item: ${e.message}")
+                    }
+            }
+        } catch (e: Exception) {
+            _uploadStatus.value = UploadStatus.Error
+            onResult(false, "An unexpected error occurred: ${e.message}")
+        }
+    }
+
 
     fun submitReport(
         reportState: ReportItemState,

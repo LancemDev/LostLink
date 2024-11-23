@@ -27,7 +27,9 @@ import com.example.firebaseauthdemoapp.AppViewModel
 import com.example.firebaseauthdemoapp.ItemCategory
 import com.example.firebaseauthdemoapp.R
 import com.example.firebaseauthdemoapp.UploadItemState
-import com.example.firebaseauthdemoapp.UploadStatus
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import coil.compose.rememberImagePainter
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +39,7 @@ fun UploadFoundItem(
 ) {
     val context = LocalContext.current
 
-    var reportState by remember { mutableStateOf(UploadItemState()) }
+    var uploadState by remember { mutableStateOf(UploadItemState()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var expandedCategoryMenu by remember { mutableStateOf(false) }
@@ -57,7 +59,17 @@ fun UploadFoundItem(
         add(Calendar.MONTH, -1)
     }
 
-    val uploadStatus by viewModel.uploadStatus.collectAsState()
+    var isLoading by remember { mutableStateOf(false) }
+    LaunchedEffect(locationPermissionGranted) {
+        if (!locationPermissionGranted) {
+            // Request permission if not granted
+            ActivityCompat.requestPermissions(
+                context as Activity,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
+        }
+    }
 
     Scaffold(
         containerColor = AppTheme.Background,
@@ -78,8 +90,8 @@ fun UploadFoundItem(
         ) {
             // Item Name
             OutlinedTextField(
-                value = reportState.itemName,
-                onValueChange = { reportState = reportState.copy(itemName = it) },
+                value = uploadState.itemName,
+                onValueChange = { uploadState = uploadState.copy(itemName = it) },
                 label = { Text("Item Name", color = AppTheme.TextGray) },
                 placeholder = { Text("Enter item name") },
                 modifier = Modifier.fillMaxWidth(),
@@ -96,7 +108,7 @@ fun UploadFoundItem(
                 onExpandedChange = { expandedCategoryMenu = !expandedCategoryMenu }
             ) {
                 OutlinedTextField(
-                    value = reportState.category.name,
+                    value = uploadState.category.name,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Category", color = AppTheme.TextGray) },
@@ -116,7 +128,7 @@ fun UploadFoundItem(
                         DropdownMenuItem(
                             text = { Text(category.name) },
                             onClick = {
-                                reportState = reportState.copy(category = category)
+                                uploadState = uploadState.copy(category = category)
                                 expandedCategoryMenu = false
                             }
                         )
@@ -126,8 +138,8 @@ fun UploadFoundItem(
 
             // Description
             OutlinedTextField(
-                value = reportState.description,
-                onValueChange = { reportState = reportState.copy(description = it) },
+                value = uploadState.description,
+                onValueChange = { uploadState = uploadState.copy(description = it) },
                 label = { Text("Description", color = AppTheme.TextGray) },
                 placeholder = { Text("Describe the item in detail") },
                 modifier = Modifier
@@ -265,76 +277,63 @@ fun UploadFoundItem(
                         Text("Pick an Image", color = AppTheme.OnPrimary)
                     }
 
-                    selectedImageUri?.let {
-                        val painter = rememberAsyncImagePainter(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(it)
-                                .crossfade(true)
-                                .build(),
-                            contentScale = ContentScale.Crop
-                        )
 
+                    selectedImageUri?.let { uri ->
                         Image(
-                            painter = painter,
+                            painter = rememberImagePainter(data = uri),
                             contentDescription = "Selected Image",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
-                                .padding(top = 8.dp),
-                            contentScale = ContentScale.Crop
                         )
                     }
+
                 }
             }
 
             // Submit Button
             Button(
                 onClick = {
-                    viewModel.uploadFoundItem(
-                        reportState = reportState,
+                    if (uploadState.itemName.isBlank() || uploadState.category == null) {
+                        Toast.makeText(context, "Please fill in all required fields!", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    isLoading = true
+                    viewModel.submitFoundItem(
+                        uploadState = uploadState,
                         locationDescription = locationDescription,
                         selectedDate = selectedDate,
                         selectedTime = selectedTime,
                         imageUri = selectedImageUri
-                    )
+                    ) { isSuccess, message ->
+                        isLoading = false
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        if (isSuccess) {
+                            // Reset fields on success
+                            uploadState = UploadItemState()
+                            locationDescription = ""
+                            selectedDate = ""
+                            selectedTime = ""
+                            selectedImageUri = null
+                        }
+                    }
                 },
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = AppTheme.Primary)
             ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = AppTheme.OnPrimary, modifier = Modifier.size(24.dp))
+                    Spacer(Modifier.width(8.dp))
+                }
                 Text("Upload Found Item", color = AppTheme.OnPrimary)
             }
         }
+        }
     }
 
-    // Show success or error dialog based on upload status
-    when (uploadStatus) {
-        UploadStatus.Success -> {
-            AlertDialog(
-                onDismissRequest = { viewModel.resetUploadStatus() },
-                title = { Text("Success") },
-                text = { Text("Item uploaded successfully!") },
-                confirmButton = {
-                    Button(onClick = { viewModel.resetUploadStatus() }) {
-                        Text("OK")
-                    }
-                }
-            )
-        }
-        UploadStatus.Error -> {
-            AlertDialog(
-                onDismissRequest = { viewModel.resetUploadStatus() },
-                title = { Text("Error") },
-                text = { Text("Failed to upload item. Please try again.") },
-                confirmButton = {
-                    Button(onClick = { viewModel.resetUploadStatus() }) {
-                        Text("OK")
-                    }
-                }
-            )
-        }
-        else -> {}
-    }
-}
+
 
 @Preview(showBackground = true)
 @Composable
