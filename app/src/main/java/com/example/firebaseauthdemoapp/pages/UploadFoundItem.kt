@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -23,26 +24,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.rememberImagePainter
 import com.example.firebaseauthdemoapp.AppViewModel
 import com.example.firebaseauthdemoapp.ItemCategory
+import com.example.firebaseauthdemoapp.R
 import com.example.firebaseauthdemoapp.UploadItemState
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import android.widget.Toast
-
 import java.util.*
 
-//val Coral = Color(0xFFDA7756)
-//val Peachy = Color(0xFFEDCDBF)
-//
-//val Coral = Color(0xFFDA7756)
-//val Peachy = Color(0xFFEDCDBF)
+private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -335,7 +331,7 @@ fun UploadFoundItem(
                     }
 
                     selectedImageUri?.let {
-                        Image(painter = rememberImagePainter(it), contentDescription = "Selected Image")
+                        Image(painter = painterResource(id = R.drawable.lostlink), contentDescription = "Selected Image")
                     }
                 }
             }
@@ -357,5 +353,3 @@ fun UploadFoundItem(
 fun PreviewUploadFoundItem() {
     UploadFoundItem()
 }
-
-private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
