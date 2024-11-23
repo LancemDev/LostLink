@@ -63,7 +63,6 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.appdistribution.gradle)
-    implementation("io.coil-kt:coil-compose:2.3.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -71,4 +70,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.coil.compose)
 }
