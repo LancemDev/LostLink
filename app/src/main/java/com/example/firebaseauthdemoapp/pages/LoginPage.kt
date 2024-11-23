@@ -97,7 +97,7 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
             )
 
             Text(
-                text = "Login Page",
+                text = "Welcome Back!",
                 fontSize = 32.sp,
                 color = MaterialTheme.colorScheme.primary
             )

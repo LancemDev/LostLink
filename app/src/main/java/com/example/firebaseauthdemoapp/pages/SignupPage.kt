@@ -1,6 +1,7 @@
 package com.example.firebaseauthdemoapp.pages
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -15,12 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.firebaseauthdemoapp.AuthState
 import com.example.firebaseauthdemoapp.AuthViewModel
+import com.example.firebaseauthdemoapp.R
 import com.example.firebaseauthdemoapp.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,8 +53,17 @@ fun SignupPage(modifier: Modifier = Modifier, navController: NavController, auth
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Add the drawable image at the top of the signup form
+        Image(
+            painter = painterResource(id = R.drawable.lostlink),  // Correct usage of painterResource
+            contentDescription = "Signup Image",
+            modifier = Modifier
+                .size(120.dp) // Adjust size as needed
+                .padding(bottom = 32.dp) // Add padding if required
+        )
+
         Text(
-            text = "Signup Page",
+            text = "Create Account",
             fontSize = 32.sp,
             color = AppTheme.Primary, // Using AppTheme primary color for title
             style = TextStyle(fontSize = 32.sp)
@@ -73,19 +85,20 @@ fun SignupPage(modifier: Modifier = Modifier, navController: NavController, auth
             )
         )
 
-
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text(text = "Password", color = AppTheme.Primary) }, // Using primary color for label
+            label = { Text(text = "Password") }, // Using primary color for label
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp), // Added padding to avoid full width
             colors = androidx.compose.material3.TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = AppTheme.Primary,
-                unfocusedBorderColor = AppTheme.TextGray
+                unfocusedBorderColor = AppTheme.Primary,
+                focusedLabelColor = AppTheme.Primary, // Set focused label color
+                unfocusedLabelColor = AppTheme.TextGray // Set unfocused label color
             )
         )
 

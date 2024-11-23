@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,6 +24,8 @@ import com.example.firebaseauthdemoapp.pages.*
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 @Composable
 fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
@@ -129,7 +132,9 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
                     selectedIndex = selectedIndex,
                     navController = navController,
                     authViewModel = authViewModel,
-                    isAdmin = isAdmin
+                    isAdmin = isAdmin,
+                    firestore = FirebaseFirestore.getInstance(),
+                    storage = FirebaseStorage.getInstance()
                 )
             }
         }
@@ -146,8 +151,13 @@ fun ContentScreen(
     navController: NavController,
     authViewModel: AuthViewModel,
     isAdmin: Boolean,
+    firestore: FirebaseFirestore,
+    storage: FirebaseStorage,
     fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(LocalContext.current)
 ) {
+    val factory = AppViewModelFactory(firestore, storage)
+    val appViewModel: AppViewModel = viewModel(factory = factory)
+
     if (isAdmin) {
         when (selectedIndex) {
             0 -> AdminDashboardPage()
@@ -156,7 +166,7 @@ fun ContentScreen(
     } else {
         when (selectedIndex) {
             0 -> NewHomePage(navController = navController, authViewModel = authViewModel)
-            1 -> ReportPage(viewModel = AppViewModel(), fusedLocationClient = fusedLocationClient)
+            1 -> ReportPage(viewModel = appViewModel, fusedLocationClient = fusedLocationClient)
             2 -> ProfilePage(navController = navController, authViewModel = authViewModel)
             3 -> ChatBot()
         }

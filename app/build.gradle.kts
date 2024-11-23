@@ -38,12 +38,15 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packagingOptions {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
-
-    implementation("io.coil-kt:coil-compose:2.3.0")
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -58,6 +61,9 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.play.services.location)
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.appdistribution.gradle)
+    implementation("io.coil-kt:coil-compose:2.3.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
