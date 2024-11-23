@@ -1,7 +1,7 @@
 [versions]
 accompanistGlide = "0.28.0"
 agp = "8.7.2"
-coilCompose = "3.0.3"
+coilCompose = "2.4.0"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -29,7 +29,8 @@ accompanist-glide = { module = "com.google.accompanist:accompanist-glide", versi
 accompanist-imageloading = { module = "com.google.accompanist:accompanist-imageloading", version.ref = "accompanistGlide" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose-v285 = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
