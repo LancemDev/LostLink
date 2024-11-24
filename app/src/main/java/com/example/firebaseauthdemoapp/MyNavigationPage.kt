@@ -42,7 +42,6 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
         NavItem("Home", Icons.Default.Home),
         NavItem("Report", Icons.Default.Send),
         NavItem("History", Icons.Default.Refresh),
-        NavItem("AI", Icons.Default.Call),
         NavItem("Settings", Icons.Default.Settings)
     )
 
@@ -188,8 +187,7 @@ fun ContentScreen(
             0 -> NewHomePage(navController = navController, authViewModel = authViewModel)
             1 -> ReportPage(viewModel = appViewModel, fusedLocationClient = fusedLocationClient)
             2 -> ReportHistory(viewModel = appViewModel)
-            3 -> ChatBot()
-            4 -> ProfilePage(navController = navController, authViewModel = authViewModel)
+            3 -> ProfilePage(navController = navController, authViewModel = authViewModel)
         }
     }
 }
