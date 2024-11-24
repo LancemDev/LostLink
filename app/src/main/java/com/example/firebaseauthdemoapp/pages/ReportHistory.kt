@@ -26,7 +26,7 @@ fun ReportHistory(viewModel: AppViewModel = viewModel()) {
     val reportHistory by viewModel.reportHistory.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.fetchReportHistory()
+            viewModel.fetchReportHistory()
     }
 
     Scaffold(

@@ -14,12 +14,37 @@ import androidx.compose.ui.unit.dp
 import com.example.firebaseauthdemoapp.AppTheme
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.text.font.FontWeight
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
+import com.example.firebaseauthdemoapp.ImageUtils
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.foundation.Image
 
 data class Item(
-    val title: String,
-    val description: String,
-    val status: String
+    val id: String = "",
+    val itemName: String = "",
+    val category: String = "",
+    val description: String = "",
+    val locationDescription: String = "",
+    val selectedDate: String = "",
+    val selectedTime: String = "",
+    val status: String = "",
+    val imageData: String? = null
 )
 
 class ItemOverview : ComponentActivity() {
@@ -116,19 +141,44 @@ fun ReportedItemsSection() {
 
 @Composable
 fun FoundItemsSection() {
-    val items = listOf(
-        Item("Item 3", "Description of Item 3", "Found"),
-        Item("Item 4", "Description of Item 4", "Found")
-    )
+    var foundItems by remember { mutableStateOf<List<Item>>(emptyList()) }
 
-    Column(
+    LaunchedEffect(Unit) {
+        Firebase.firestore.collection("found_items")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.e("FoundItemsSection", "Listen failed", e)
+                    return@addSnapshotListener
+                }
+                
+                foundItems = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        Item(
+                            id = doc.id,
+                            itemName = doc.getString("itemName") ?: "",
+                            category = doc.getString("category") ?: "OTHER",
+                            description = doc.getString("description") ?: "",
+                            locationDescription = doc.getString("locationDescription") ?: "",
+                            selectedDate = doc.getString("selectedDate") ?: "",
+                            selectedTime = doc.getString("selectedTime") ?: "",
+                            status = doc.getString("status") ?: "pending",
+                            imageData = doc.getString("imageData")
+                        )
+                    } catch (e: Exception) {
+                        Log.e("FoundItemsSection", "Error parsing document", e)
+                        null
+                    }
+                } ?: emptyList()
+            }
+    }
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Found Items", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        items.forEach { item ->
+        items(foundItems) { item ->
             ItemCard(item = item)
         }
     }
@@ -156,21 +206,112 @@ fun ClaimedItemsSection() {
 
 @Composable
 fun ItemCard(item: Item) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    // Convert category string to proper format
+    val displayCategory = remember(item.category) {
+        when (item.category.uppercase()) {
+            "ELECTRONICS" -> "Electronics"
+            "CLOTHING" -> "Clothing"
+            "ACCESSORIES" -> "Accessories"
+            "DOCUMENTS" -> "Documents"
+            "KEYS" -> "Keys"
+            "WALLET" -> "Wallet"
+            "BAG" -> "Bag"
+            "OTHER" -> "Other"
+            else -> item.category // fallback to original value
+        }
+    }
+
+    val bitmap = remember(item.imageData) {
+        item.imageData?.let { base64String ->
+            try {
+                ImageUtils.base64ToBitmap(base64String)
+            } catch (e: Exception) {
+                Log.e("ItemCard", "Error loading image", e)
+                null
+            }
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = AppTheme.Surface),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
-            Text(item.title, style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(item.description, style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text("Status: ${item.status}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = item.itemName,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        ),
+                        color = AppTheme.OnSurface
+                    )
+                    Text(
+                        text = "Category: $displayCategory",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AppTheme.OnSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = "Status: ${item.status}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = when (item.status) {
+                            "pending" -> Color.Yellow
+                            "matched" -> Color.Green
+                            "found" -> Color.Blue
+                            "closed" -> Color.Red
+                            else -> AppTheme.OnSurface.copy(alpha = 0.7f)
+                        }
+                    )
+                }
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        tint = AppTheme.Primary
+                    )
+                }
+            }
+            if (expanded) {
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Display image if bitmap was successfully created
+                bitmap?.let { btm ->
+                    Image(
+                        bitmap = btm.asImageBitmap(),
+                        contentDescription = "Item Image",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                
+                Text(
+                    text = "Description: ${item.description}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AppTheme.OnSurface.copy(alpha = 0.7f)
+                )
+                Text(
+                    text = "Location: ${item.locationDescription}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AppTheme.OnSurface.copy(alpha = 0.7f)
+                )
+                Text(
+                    text = "Date: ${item.selectedDate} ${item.selectedTime}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AppTheme.OnSurface.copy(alpha = 0.7f)
+                )
+            }
         }
     }
 }

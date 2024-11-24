@@ -3,6 +3,7 @@ package com.example.firebaseauthdemoapp.pages
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,14 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.android.volley.toolbox.ImageRequest
 import com.example.firebaseauthdemoapp.AppViewModel
 import com.example.firebaseauthdemoapp.ItemCategory
 import com.example.firebaseauthdemoapp.R
 import com.example.firebaseauthdemoapp.UploadItemState
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import coil.compose.rememberImagePainter
+import com.example.firebaseauthdemoapp.UploadStatus
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +37,7 @@ fun UploadFoundItem(
 ) {
     val context = LocalContext.current
 
-    var uploadState by remember { mutableStateOf(UploadItemState()) }
+    var reportState by remember { mutableStateOf(UploadItemState()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var expandedCategoryMenu by remember { mutableStateOf(false) }
@@ -54,22 +52,13 @@ fun UploadFoundItem(
 
     val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         selectedImageUri = uri
+        Log.d("UploadFoundItem", "Selected Image URI: $uri")
     }
     val minAllowedDate = Calendar.getInstance().apply {
         add(Calendar.MONTH, -1)
     }
 
-    var isLoading by remember { mutableStateOf(false) }
-    LaunchedEffect(locationPermissionGranted) {
-        if (!locationPermissionGranted) {
-            // Request permission if not granted
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE
-            )
-        }
-    }
+    val uploadStatus by viewModel.uploadStatus.collectAsState()
 
     Scaffold(
         containerColor = AppTheme.Background,
@@ -90,8 +79,8 @@ fun UploadFoundItem(
         ) {
             // Item Name
             OutlinedTextField(
-                value = uploadState.itemName,
-                onValueChange = { uploadState = uploadState.copy(itemName = it) },
+                value = reportState.itemName,
+                onValueChange = { reportState = reportState.copy(itemName = it) },
                 label = { Text("Item Name", color = AppTheme.TextGray) },
                 placeholder = { Text("Enter item name") },
                 modifier = Modifier.fillMaxWidth(),
@@ -108,7 +97,7 @@ fun UploadFoundItem(
                 onExpandedChange = { expandedCategoryMenu = !expandedCategoryMenu }
             ) {
                 OutlinedTextField(
-                    value = uploadState.category.name,
+                    value = reportState.category.name,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Category", color = AppTheme.TextGray) },
@@ -128,7 +117,7 @@ fun UploadFoundItem(
                         DropdownMenuItem(
                             text = { Text(category.name) },
                             onClick = {
-                                uploadState = uploadState.copy(category = category)
+                                reportState = reportState.copy(category = category)
                                 expandedCategoryMenu = false
                             }
                         )
@@ -138,8 +127,8 @@ fun UploadFoundItem(
 
             // Description
             OutlinedTextField(
-                value = uploadState.description,
-                onValueChange = { uploadState = uploadState.copy(description = it) },
+                value = reportState.description,
+                onValueChange = { reportState = reportState.copy(description = it) },
                 label = { Text("Description", color = AppTheme.TextGray) },
                 placeholder = { Text("Describe the item in detail") },
                 modifier = Modifier
@@ -277,66 +266,74 @@ fun UploadFoundItem(
                         Text("Pick an Image", color = AppTheme.OnPrimary)
                     }
 
+                    selectedImageUri?.let {
+                        val painter = rememberAsyncImagePainter(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(it)
+                                .crossfade(true)
+                                .build(),
+                            contentScale = ContentScale.Crop
+                        )
 
-                    selectedImageUri?.let { uri ->
                         Image(
-                            painter = rememberImagePainter(data = uri),
+                            painter = painter,
                             contentDescription = "Selected Image",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
+                                .padding(top = 8.dp),
+                            contentScale = ContentScale.Crop
                         )
                     }
-
                 }
             }
 
             // Submit Button
             Button(
                 onClick = {
-                    if (uploadState.itemName.isBlank() || uploadState.category == null) {
-                        Toast.makeText(context, "Please fill in all required fields!", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
-
-                    isLoading = true
-                    viewModel.submitFoundItem(
-                        uploadState = uploadState,
+                    viewModel.uploadFoundItem(
+                        context = context,
+                        reportState = reportState,
                         locationDescription = locationDescription,
                         selectedDate = selectedDate,
                         selectedTime = selectedTime,
                         imageUri = selectedImageUri
-                    ) { isSuccess, message ->
-                        isLoading = false
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        if (isSuccess) {
-                            // Reset fields on success
-                            uploadState = UploadItemState()
-                            locationDescription = ""
-                            selectedDate = ""
-                            selectedTime = ""
-                            selectedImageUri = null
-                        }
-                    }
+                    )
                 },
-                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = AppTheme.Primary)
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator(color = AppTheme.OnPrimary, modifier = Modifier.size(24.dp))
-                    Spacer(Modifier.width(8.dp))
-                }
                 Text("Upload Found Item", color = AppTheme.OnPrimary)
             }
         }
-        }
     }
 
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewUploadFoundItem() {
-    UploadFoundItem()
+    // Show success or error dialog based on upload status
+    when (uploadStatus) {
+        UploadStatus.Success -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.resetUploadStatus() },
+                title = { Text("Success") },
+                text = { Text("Item uploaded successfully!") },
+                confirmButton = {
+                    Button(onClick = { viewModel.resetUploadStatus() }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+        UploadStatus.Error -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.resetUploadStatus() },
+                title = { Text("Error") },
+                text = { Text("Failed to upload item. Please try again.") },
+                confirmButton = {
+                    Button(onClick = { viewModel.resetUploadStatus() }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+        else -> {}
+    }
 }

@@ -45,10 +45,10 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
     )
 
     val adminNavItemList = listOf(
-        NavItem("Admin Dashboard", Icons.Default.Home),
+        NavItem("Dashboard", Icons.Default.Home),
         NavItem("Upload", Icons.Default.AddCircle),
-        NavItem("Item Progress Tracker",Icons.Default.List),
-        NavItem("Admin Settings", Icons.Default.Settings)
+        NavItem("Progress",Icons.Default.List),
+        NavItem("Settings", Icons.Default.Settings)
     )
 
     var selectedIndex by remember { mutableIntStateOf(0) }

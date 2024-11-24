@@ -64,6 +64,8 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.appdistribution.gradle)
     implementation(libs.volley)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,6 +76,4 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose.v285)
 
     implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
-    implementation(libs.coil.kt.coil.compose)
 }
