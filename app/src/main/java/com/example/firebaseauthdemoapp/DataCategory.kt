@@ -6,5 +6,9 @@ enum class DataCategory {
     CLOTHING,
     ACCESSORIES,
     DOCUMENTS,
+    BAGS,
+    CARDS,
+    GEAR,
+    MISCELLANEOUS,
     OTHER;
 }
