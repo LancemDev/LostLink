@@ -1,5 +1,7 @@
 package com.example.firebaseauthdemoapp
 
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -47,7 +49,7 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
     val adminNavItemList = listOf(
         NavItem("Dashboard", Icons.Default.Home),
         NavItem("Upload", Icons.Default.AddCircle),
-        NavItem("Progress",Icons.Default.List),
+        NavItem("Progress", Icons.Default.List),
         NavItem("Settings", Icons.Default.Settings)
     )
 
@@ -58,7 +60,16 @@ fun MyNavigationPage(modifier: Modifier, authViewModel: AuthViewModel) {
             LoadingScreen()
         }
         is AuthState.Error -> {
-            ErrorScreen((authState as AuthState.Error).message)
+            ErrorScreen(
+                message = (authState as AuthState.Error).message,
+                onRetry = {
+                    Log.d("Navigation", "Retry clicked - attempting to navigate to login")
+                    authViewModel.resetAuthState()
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    }
+                }
+            )
         }
         is AuthState.Unauthenticated -> {
             NavHost(
@@ -200,34 +211,21 @@ fun LoadingScreen() {
 }
 
 @Composable
-fun ErrorScreen(message: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+fun ErrorScreen(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = AppTheme.Primary,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            Button(
-                onClick = { /* Handle retry action */ },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = AppTheme.Primary,
-                    contentColor = Color.White
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Retry")
+        Text(text = message)
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = { 
+                Log.d("ErrorScreen", "Retry button clicked")
+                onRetry() 
             }
+        ) {
+            Text("Retry")
         }
     }
 }

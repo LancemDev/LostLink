@@ -110,7 +110,8 @@ class AppViewModel : ViewModel() {
                             ReportItemState(
                                 itemName = document.getString("itemName") ?: "",
                                 category = ItemCategory.valueOf(document.getString("category") ?: "OTHER"),
-                                description = document.getString("description") ?: ""
+                                locationDescription = document.getString("locationDescription") ?: "",
+                                status = document.getString("status") ?: ""
                             )
                         }
                         _reportHistory.value = reports

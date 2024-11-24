@@ -79,17 +79,24 @@ fun ReportItem(report: ReportItemState) {
                         style = MaterialTheme.typography.bodyMedium,
                         color = AppTheme.OnSurface.copy(alpha = 0.7f)
                     )
-                    Text(
-                        text = "Status: ${report.status}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = when (report.status) {
-                            "pending" -> Color.Yellow
-                            "matched" -> Color.Green
-                            "found" -> Color.Blue
-                            "closed" -> Color.Red
-                            else -> AppTheme.OnSurface.copy(alpha = 0.7f)
-                        }
-                    )
+                    Row {
+                        Text(
+                            text = "Status: ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = AppTheme.OnSurface.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = report.status,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = when (report.status) {
+                                "pending" -> Color.Yellow
+                                "matched" -> Color.Green
+                                "found" -> Color.Blue
+                                "closed" -> Color.Red
+                                else -> AppTheme.OnSurface.copy(alpha = 0.7f)
+                            }
+                        )
+                    }
                 }
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
@@ -107,7 +114,7 @@ fun ReportItem(report: ReportItemState) {
                     color = AppTheme.OnSurface.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = "Location: ${report.lastSeenLocation}",
+                    text = "Location: ${report.locationDescription}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = AppTheme.OnSurface.copy(alpha = 0.7f)
                 )
