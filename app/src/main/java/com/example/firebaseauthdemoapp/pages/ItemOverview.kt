@@ -145,7 +145,7 @@ fun ReportedItemsSection() {
                             selectedTime =  "",
                             status = doc.getString("status") ?: "pending",
 
-                        )
+                            )
                     } catch (e: Exception) {
                         Log.e("ReportedItemsSection", "Error parsing document", e)
                         null
@@ -171,6 +171,7 @@ fun ReportedItemsSection() {
 fun FoundItemsSection() {
     var foundItems by remember { mutableStateOf<List<Item>>(emptyList()) }
 
+    // Firestore listener for "found_items" collection
     LaunchedEffect(Unit) {
         Firebase.firestore.collection("found_items")
             .addSnapshotListener { snapshot, e ->
@@ -178,7 +179,7 @@ fun FoundItemsSection() {
                     Log.e("FoundItemsSection", "Listen failed", e)
                     return@addSnapshotListener
                 }
-                
+
                 foundItems = snapshot?.documents?.mapNotNull { doc ->
                     try {
                         Item(
@@ -189,7 +190,6 @@ fun FoundItemsSection() {
                             locationDescription = doc.getString("locationDescription") ?: "",
                             selectedDate = doc.getString("selectedDate") ?: "",
                             selectedTime = doc.getString("selectedTime") ?: "",
-                            status = doc.getString("status") ?: "pending",
                             imageData = doc.getString("imageData")
                         )
                     } catch (e: Exception) {
@@ -207,35 +207,96 @@ fun FoundItemsSection() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(foundItems) { item ->
-            ItemCard(item = item)
+            ItemCard(
+                item = item,
+                onClick = { unclaimItem(item) },  // This handles unclaiming the item
+                showButton = true,
+                showStatus = false
+            )
         }
     }
 }
+
+fun unclaimItem(item: Item) {
+    val db = Firebase.firestore
+
+    // Step 1: Remove the item from found_items collection
+    db.collection("found_items").document(item.id)
+        .delete()
+        .addOnSuccessListener {
+            Log.d("UnclaimItem", "Item removed from found_items")
+
+            // Step 2: Add the item to claimed_items collection
+            db.collection("claimed_items").document(item.id)
+                .set(item)  // Use the same item data to store in claimed_items
+                .addOnSuccessListener {
+                    Log.d("UnclaimItem", "Item moved to claimed_items")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("UnclaimItem", "Error adding to claimed_items", e)
+                }
+        }
+        .addOnFailureListener { e ->
+            Log.e("UnclaimItem", "Error removing item from found_items", e)
+        }
+}
+
+
 
 @Composable
 fun ClaimedItemsSection() {
-    val items = listOf(
-        Item("Item 5", "Description of Item 5", "Claimed"),
-        Item("Item 6", "Description of Item 6", "Claimed")
-    )
+    var claimedItems by remember { mutableStateOf<List<Item>>(emptyList()) }
 
-    Column(
+    LaunchedEffect(Unit) {
+        Firebase.firestore.collection("claimed_items")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.e("ClaimedItemsSection", "Listen failed", e)
+                    return@addSnapshotListener
+                }
+
+                claimedItems = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        Item(
+                            id = doc.id,
+                            itemName = doc.getString("itemName") ?: "",
+                            category = doc.getString("category") ?: "OTHER",
+                            description = doc.getString("description") ?: "",
+                            locationDescription = doc.getString("locationDescription") ?: "",
+                            selectedDate = doc.getString("selectedDate") ?: "",
+                            selectedTime = doc.getString("selectedTime") ?: "",
+                            imageData = doc.getString("imageData")
+                        )
+                    } catch (e: Exception) {
+                        Log.e("ClaimedItemsSection", "Error parsing document", e)
+                        null
+                    }
+                } ?: emptyList()
+            }
+    }
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Claimed Items", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        items.forEach { item ->
+        items(claimedItems) { item ->
             ItemCard(item = item)
         }
     }
 }
 
 @Composable
-fun ItemCard(item: Item) {
+fun ItemCard(
+    item: Item,
+    onClick: () -> Unit = {},
+    showButton: Boolean = false,
+    showStatus: Boolean = true,
+    modifier: Modifier = Modifier
+) {
     var expanded by remember { mutableStateOf(false) }
-    
+
     // Convert category string to proper format
     val displayCategory = remember(item.category) {
         when (item.category.uppercase()) {
@@ -261,84 +322,107 @@ fun ItemCard(item: Item) {
             }
         }
     }
-
-    Card(
-        modifier = Modifier
+    Box(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = AppTheme.Surface),
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(vertical = 8.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = AppTheme.Surface),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = item.itemName,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp
+                            ),
+                            color = AppTheme.OnSurface
+                        )
+                        Text(
+                            text = "Category: $displayCategory",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = AppTheme.OnSurface.copy(alpha = 0.7f)
+                        )
+                        if (showStatus) {
+                            Text(
+                                text = "Status: ${item.status}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = when (item.status) {
+                                    "pending" -> Color(0xFFDA7756)
+                                    "matched" -> Color.Green
+                                    "found" -> Color.Blue
+                                    "closed" -> Color.Red
+                                    else -> AppTheme.OnSurface.copy(alpha = 0.7f)
+                                }
+                            )
+                        }
+                    }
+                    IconButton(onClick = { expanded = !expanded },
+                        modifier = Modifier.padding(top = 4.dp)) {
+                        Icon(
+                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.ArrowDropDown,
+                            contentDescription = null,
+                            tint = AppTheme.Primary
+                        )
+                    }
+                }
+                if (expanded) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Display image if bitmap was successfully created
+                    bitmap?.let { btm ->
+                        Image(
+                            bitmap = btm.asImageBitmap(),
+                            contentDescription = "Item Image",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
                     Text(
-                        text = item.itemName,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        ),
-                        color = AppTheme.OnSurface
-                    )
-                    Text(
-                        text = "Category: $displayCategory",
+                        text = "Description: ${item.description}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = AppTheme.OnSurface.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = "Status: ${item.status}",
+                        text = "Location: ${item.locationDescription}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = when (item.status) {
-                            "pending" -> Color.Yellow
-                            "matched" -> Color.Green
-                            "found" -> Color.Blue
-                            "closed" -> Color.Red
-                            else -> AppTheme.OnSurface.copy(alpha = 0.7f)
-                        }
+                        color = AppTheme.OnSurface.copy(alpha = 0.7f)
                     )
-                }
-                IconButton(onClick = { expanded = !expanded }) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        tint = AppTheme.Primary
+                    Text(
+                        text = "Date: ${item.selectedDate} ${item.selectedTime}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AppTheme.OnSurface.copy(alpha = 0.7f)
                     )
                 }
             }
-            if (expanded) {
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // Display image if bitmap was successfully created
-                bitmap?.let { btm ->
-                    Image(
-                        bitmap = btm.asImageBitmap(),
-                        contentDescription = "Item Image",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                
-                Text(
-                    text = "Description: ${item.description}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AppTheme.OnSurface.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = "Location: ${item.locationDescription}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AppTheme.OnSurface.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = "Date: ${item.selectedDate} ${item.selectedTime}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AppTheme.OnSurface.copy(alpha = 0.7f)
-                )
+        }
+        if (showButton) {
+            Button(
+                onClick = onClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AppTheme.Primary // or the color used for those texts
+                ),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(10.dp)
+            ) {
+                Text("Unclaimed")
             }
         }
     }
