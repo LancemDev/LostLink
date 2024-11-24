@@ -22,7 +22,7 @@ playServicesLocation = "21.3.0"
 firebaseStorageKtx = "21.0.1"
 firebaseAppdistributionGradle = "5.0.0"
 lifecycleViewModelCompose = "2.6.1"
-volley = "1.2.1"  # Added ViewModel Compose version
+volley = "1.2.1"
 
 [libraries]
 accompanist-coil = { module = "com.google.accompanist:accompanist-coil", version.ref = "accompanistGlide" }
@@ -32,7 +32,6 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-lifecycle-viewmodel-compose-v285 = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
 
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
