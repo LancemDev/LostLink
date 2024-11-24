@@ -2,10 +2,10 @@ package com.example.firebaseauthdemoapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val Purple80 = Color(0xFFDA7756)      // Coral/salmon color
+val PurpleGrey80 = Color(0xFFEDCDBF)   // Soft peachy background
+val Pink80 = Color.White              // White text on primary color
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val Purple40 = Color(0xFF666666)     // Gray for unselected items
+val PurpleGrey40 = Color(0xFF333333)    // Dark gray text on surface
+val Pink40 = Color(0xFFFFFFFF)      // White surface color
