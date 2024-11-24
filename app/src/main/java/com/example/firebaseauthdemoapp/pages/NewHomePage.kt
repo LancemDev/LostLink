@@ -19,11 +19,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.firebaseauthdemoapp.AuthState
 import com.example.firebaseauthdemoapp.AuthViewModel
 
 data class Category(
@@ -44,13 +44,13 @@ fun NewHomePage(
 
     val categories = listOf(
         Category("Electronics", "https://i.pinimg.com/736x/9f/a4/a6/9fa4a69d41ce831151c8bb5f2039bf1a.jpg", "electronics"),
-        Category("Clothing", "/api/placeholder/150/150", "clothing"),
-        Category("Backpacks", "/api/placeholder/150/150", "backpacks"),
-        Category("Personal Accessories", "/api/placeholder/150/150", "accessories"),
-        Category("School Supplies", "/api/placeholder/150/150", "school-supplies"),
-        Category("ID & Cards", "/api/placeholder/150/150", "identification"),
-        Category("Sports Gear", "/api/placeholder/150/150", "sports"),
-        Category("Miscellaneous", "/api/placeholder/150/150", "miscellaneous")
+        Category("Clothing", "https://i.pinimg.com/736x/3d/ce/da/3dcedac1c78683821be902d1ab1bbf79.jpg", "clothing"),
+        Category("Bags", "https://i.pinimg.com/736x/7d/28/1d/7d281d3722a76fb0b00dd485f6d2561d.jpg", "backpacks"),
+        Category("Personal Accessories", "https://i.pinimg.com/736x/db/d6/39/dbd639e9e546c6374f53be87bf714991.jpg", "accessories"),
+        Category("School Supplies", "https://i.pinimg.com/736x/9c/c8/58/9cc8584067434d74acd9630a7602a67f.jpg", "school-supplies"),
+        Category("ID & Cards", "https://i.pinimg.com/736x/2c/b1/1f/2cb11f99587d98e80cedfeb5cb7dc02d.jpg", "identification"),
+        Category("Sports & Gym Gear", "https://i.pinimg.com/736x/31/e2/51/31e251fd703f7af81e8028abeabbd69e.jpg", "sports"),
+        Category("Miscellaneous", "https://i.pinimg.com/736x/50/7f/f5/507ff50090658bf85c2351bf4e5856de.jpg", "miscellaneous")
     )
 
     Scaffold(
@@ -73,15 +73,56 @@ fun NewHomePage(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(Color(0xFFEDCDBF))
-                .padding(16.dp)
         ) {
+            // Welcome Banner (reduced height from 200.dp to 160.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+            ) {
+                // Banner Image
+                AsyncImage(
+                    model = "https://i.pinimg.com/736x/88/3d/99/883d997899a5a0ff019f40c5a170deb9.jpg",
+                    contentDescription = "Welcome Banner",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+
+                // Overlay with Welcome Text
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.4f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "Welcome to Home",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Find your lost items",
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
             // Search Bar
             TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .padding(16.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 placeholder = { Text("Search lost items...") },
                 leadingIcon = {
@@ -95,11 +136,14 @@ fun NewHomePage(
                 singleLine = true
             )
 
-            // Categories Grid
+            // Categories Grid with bottom padding
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 24.dp) // Added bottom padding
             ) {
                 items(categories) { category ->
                     CategoryCard(
@@ -123,32 +167,36 @@ fun CategoryCard(
             .aspectRatio(1f)
             .clickable(onClick = onCategoryClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF7B3F00))
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
+        )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
+            // Background Image
             AsyncImage(
                 model = category.imageUrl,
                 contentDescription = category.name,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = category.name,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White
-            )
+            // Text Overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = category.name,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
