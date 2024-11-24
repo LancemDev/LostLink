@@ -121,23 +121,51 @@ fun ItemOverviewPage() {
 
 @Composable
 fun ReportedItemsSection() {
-    val items = listOf(
-        Item("Item 1", "Description of Item 1", "Reported"),
-        Item("Item 2", "Description of Item 2", "Reported")
-    )
+    var reportedItems by remember { mutableStateOf<List<Item>>(emptyList()) }
 
-    Column(
+    // Firestore listener for "reported_items" collection
+    LaunchedEffect(Unit) {
+        Firebase.firestore.collection("lostItemReports")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.e("ReportedItemsSection", "Listen failed", e)
+                    return@addSnapshotListener
+                }
+
+                reportedItems = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        Item(
+                            id = doc.id,
+                            itemName = doc.getString("itemName") ?: "",
+                            category = doc.getString("category") ?: "OTHER",
+
+                            description = doc.getString("description") ?: "",
+                            locationDescription = doc.getString("locationDescription") ?: "",
+                            selectedDate = doc.getTimestamp("dateLost")?.toDate()?.toString() ?: "",
+                            selectedTime =  "",
+                            status = doc.getString("status") ?: "pending",
+
+                        )
+                    } catch (e: Exception) {
+                        Log.e("ReportedItemsSection", "Error parsing document", e)
+                        null
+                    }
+                } ?: emptyList()
+            }
+    }
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Reported Items", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        items.forEach { item ->
+        items(reportedItems) { item ->
             ItemCard(item = item)
         }
     }
 }
+
 
 @Composable
 fun FoundItemsSection() {
