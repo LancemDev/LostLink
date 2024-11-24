@@ -161,7 +161,7 @@ fun ReportPage(
                             label = { Text("Item Name", color = AppTheme.TextGray) },
                             leadingIcon = {
                                 Icon(
-                                    Icons.Default.Info,
+                                    Icons.Default.Done,
                                     contentDescription = null,
                                     tint = AppTheme.Primary
                                 )
@@ -199,7 +199,9 @@ fun ReportPage(
                                         tint = AppTheme.Primary
                                     )
                                 },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = TextFieldDefaults.outlinedTextFieldColors(
                                     focusedBorderColor = AppTheme.Primary,
@@ -229,7 +231,7 @@ fun ReportPage(
                             label = { Text("Description", color = AppTheme.TextGray) },
                             leadingIcon = {
                                 Icon(
-                                    Icons.Default.Info,
+                                    Icons.Default.AddCircle,
                                     contentDescription = null,
                                     tint = AppTheme.Primary
                                 )
