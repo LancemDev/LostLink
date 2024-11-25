@@ -228,7 +228,7 @@ fun unclaimItem(item: Item) {
 
             // Step 2: Add the item to claimed_items collection
             db.collection("claimed_items").document(item.id)
-                .set(item)  // Use the same item data to store in claimed_items
+                .set(item.copy(status = "claimed"))
                 .addOnSuccessListener {
                     Log.d("UnclaimItem", "Item moved to claimed_items")
                 }
@@ -265,6 +265,7 @@ fun ClaimedItemsSection() {
                             locationDescription = doc.getString("locationDescription") ?: "",
                             selectedDate = doc.getString("selectedDate") ?: "",
                             selectedTime = doc.getString("selectedTime") ?: "",
+                            status = doc.getString("status") ?: "claimed",
                             imageData = doc.getString("imageData")
                         )
                     } catch (e: Exception) {
@@ -282,7 +283,8 @@ fun ClaimedItemsSection() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(claimedItems) { item ->
-            ItemCard(item = item)
+            ItemCard(item = item,
+                showStatus = true)
         }
     }
 }
@@ -364,6 +366,7 @@ fun ItemCard(
                                     "matched" -> Color.Green
                                     "found" -> Color.Blue
                                     "closed" -> Color.Red
+                                    "claimed" -> Color(0xFF795548)
                                     else -> AppTheme.OnSurface.copy(alpha = 0.7f)
                                 }
                             )
