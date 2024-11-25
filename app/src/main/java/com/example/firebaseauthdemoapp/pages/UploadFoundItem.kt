@@ -10,12 +10,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -77,21 +79,28 @@ fun UploadFoundItem(
                 .padding(bottom = 56.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Item Name
+            // Item Name with icon
             OutlinedTextField(
                 value = reportState.itemName,
                 onValueChange = { reportState = reportState.copy(itemName = it) },
                 label = { Text("Item Name", color = AppTheme.TextGray) },
-                placeholder = { Text("Enter item name") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Done,
+                        contentDescription = null,
+                        tint = AppTheme.Primary
+                    )
+                },
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = AppTheme.Primary,
                     unfocusedBorderColor = AppTheme.TextGray,
-                    focusedLabelColor = AppTheme.Primary
+                    focusedLabelColor = AppTheme.Primary,
+                    focusedTextColor = AppTheme.TextGray
                 )
             )
 
-            // Category Selector
             ExposedDropdownMenuBox(
                 expanded = expandedCategoryMenu,
                 onExpandedChange = { expandedCategoryMenu = !expandedCategoryMenu }
@@ -101,12 +110,28 @@ fun UploadFoundItem(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Category", color = AppTheme.TextGray) },
-                    trailingIcon = { Icon(Icons.Filled.ArrowDropDown, "Select category") },
-                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.MoreVert,
+                            contentDescription = null,
+                            tint = AppTheme.Primary
+                        )
+                    },
+                    trailingIcon = {
+                        Icon(
+                            Icons.Filled.ArrowDropDown,
+                            "Select category",
+                            tint = AppTheme.Primary
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    shape = RoundedCornerShape(12.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = AppTheme.Primary,
                         unfocusedBorderColor = AppTheme.TextGray,
-                        focusedLabelColor = AppTheme.Primary
+                        focusedTextColor = AppTheme.TextGray
                     )
                 )
                 ExposedDropdownMenu(
@@ -130,42 +155,39 @@ fun UploadFoundItem(
                 value = reportState.description,
                 onValueChange = { reportState = reportState.copy(description = it) },
                 label = { Text("Description", color = AppTheme.TextGray) },
-                placeholder = { Text("Describe the item in detail") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.AddCircle,
+                        contentDescription = null,
+                        tint = AppTheme.Primary
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                maxLines = 5,
+                shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = AppTheme.Primary,
                     unfocusedBorderColor = AppTheme.TextGray,
-                    focusedLabelColor = AppTheme.Primary
+                    focusedTextColor = AppTheme.TextGray
                 )
             )
 
-            // Location Section
-            OutlinedTextField(
-                value = locationDescription,
-                onValueChange = { locationDescription = it },
-                label = { Text("Location Description", color = AppTheme.TextGray) },
-                placeholder = { Text("e.g., Near the library entrance") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = AppTheme.Primary,
-                    unfocusedBorderColor = AppTheme.TextGray,
-                    focusedLabelColor = AppTheme.Primary
-                )
-            )
-
-            // Date and Time
+            // Location and DateTime Card
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = AppTheme.Background)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(8.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.9f)
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("When Was It found?", color = AppTheme.Primary, style = MaterialTheme.typography.titleMedium)
+                    Text("Where Was It Lost?", color = AppTheme.Primary, style = MaterialTheme.typography.titleMedium)
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -176,21 +198,7 @@ fun UploadFoundItem(
                                 DatePickerDialog(
                                     context,
                                     { _, year, month, dayOfMonth ->
-                                        val selectedCalendar = Calendar.getInstance().apply {
-                                            set(year, month, dayOfMonth)
-                                        }
-                                        when {
-                                            selectedCalendar.after(Calendar.getInstance()) -> {
-                                                Toast.makeText(context, "Cannot select a future date!", Toast.LENGTH_SHORT).show()
-                                            }
-                                            selectedCalendar.before(minAllowedDate) -> {
-                                                Toast.makeText(context, "Date cannot be earlier than 1 month ago!", Toast.LENGTH_SHORT).show()
-                                            }
-                                            else -> {
-                                                selectedDate = "$dayOfMonth/${month + 1}/$year"
-                                                calendar.set(year, month, dayOfMonth)
-                                            }
-                                        }
+                                        selectedDate = "$dayOfMonth/${month + 1}/$year"
                                     },
                                     calendar.get(Calendar.YEAR),
                                     calendar.get(Calendar.MONTH),
@@ -212,20 +220,7 @@ fun UploadFoundItem(
                                 TimePickerDialog(
                                     context,
                                     { _, hourOfDay, minute ->
-                                        val selectedCalendar = Calendar.getInstance().apply {
-                                            set(
-                                                calendar.get(Calendar.YEAR),
-                                                calendar.get(Calendar.MONTH),
-                                                calendar.get(Calendar.DAY_OF_MONTH),
-                                                hourOfDay,
-                                                minute
-                                            )
-                                        }
-                                        if (selectedCalendar.after(Calendar.getInstance())) {
-                                            Toast.makeText(context, "Cannot select a future time!", Toast.LENGTH_SHORT).show()
-                                        } else {
-                                            selectedTime = String.format("%02d:%02d", hourOfDay, minute)
-                                        }
+                                        selectedTime = "$hourOfDay:$minute"
                                     },
                                     calendar.get(Calendar.HOUR_OF_DAY),
                                     calendar.get(Calendar.MINUTE),

@@ -168,8 +168,8 @@ fun AdminDashboardPage(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .shadow(8.dp),
-            placeholder = { Text("Search by item name...") },
+                .shadow(8.dp, shape = RoundedCornerShape(16.dp)),
+            placeholder = { Text("Search by item name...", fontSize = 18.sp) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = AppTheme.Primary,
