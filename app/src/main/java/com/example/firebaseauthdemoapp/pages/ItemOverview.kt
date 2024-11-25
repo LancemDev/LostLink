@@ -322,12 +322,12 @@ fun ItemCard(
             }
         }
     }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
-
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -369,8 +369,7 @@ fun ItemCard(
                             )
                         }
                     }
-                    IconButton(onClick = { expanded = !expanded },
-                        modifier = Modifier.padding(top = 4.dp)) {
+                    IconButton(onClick = { expanded = !expanded }) {
                         Icon(
                             imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.ArrowDropDown,
                             contentDescription = null,
