@@ -39,6 +39,7 @@ fun AdminDashboardPage(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var foundItems by remember { mutableStateOf<List<Item>>(emptyList()) }
+    var claimed_items by remember { mutableStateOf<List<Item>>(emptyList()) }
     var filteredItems by remember { mutableStateOf<List<Item>?>(null) }
 
     // Stats state
@@ -85,10 +86,47 @@ fun AdminDashboardPage(
                     }
                 } ?: emptyList()
 
+
+
+
                 // Update stats
                 totalItems = foundItems.size
                 pendingItems = foundItems.count { it.status == "pending" }
-                claimedItems = foundItems.count { it.status == "claimed" }
+
+            }
+    }
+    LaunchedEffect(Unit) {
+        // Fetch claimed items from the claimed_items collection
+        Firebase.firestore.collection("claimed_items")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.e("AdminDashboard", "Listen failed", e)
+                    return@addSnapshotListener
+                }
+
+                // Map the claimed items from the snapshot
+                claimed_items = snapshot?.documents?.mapNotNull { document ->
+                    try {
+                        Item(
+                            id = document.id,
+                            itemName = document.getString("itemName") ?: "",
+                            category = document.getString("category") ?: "OTHER",
+                            description = document.getString("description") ?: "",
+                            locationDescription = document.getString("locationDescription") ?: "",
+                            selectedDate = document.getString("selectedDate") ?: "",
+                            selectedTime = document.getString("selectedTime") ?: "",
+                            status = document.getString("status") ?: "claimed",
+                            imageData = document.getString("imageData")
+                        )
+                    } catch (e: Exception) {
+                        Log.e("AdminDashboard", "Error parsing document", e)
+                        null
+                    }
+                } ?: emptyList()
+
+                // Update stats
+//                totalItems = claimed_items.size
+                claimedItems = claimed_items.size // Count all claimed items
             }
     }
 
