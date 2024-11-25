@@ -1,8 +1,8 @@
-# Firebase Auth Demo App
+# LostLink
 
 ## Overview
 
-The Firebase Auth Demo App is a mobile application built using Jetpack Compose that allows users to report lost items and manage found items. The app integrates with Firebase for authentication and Firestore for data storage, providing a seamless experience for users to track and manage lost and found items.
+LostLink is a mobile application built using Jetpack Compose that allows users to report lost items and manage found items. The app integrates with Firebase for authentication and Firestore for data storage, providing a seamless experience for users to track and manage lost and found items.
 
 ## Features
 
